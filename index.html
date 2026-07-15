@@ -1,0 +1,1740 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmos CLUB 各館庫存總覽</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700&family=Noto+Serif+TC:wght@600;700;800&family=Noto+Serif+TC:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:        #e8e4de;
+            --surface:   #f2efe9;
+            --surface2:  #e6e2db;
+            --border:    #cec8bf;
+            --text:      #2e2a26;
+            --text-muted:#2e2a26;
+            --text-light:#a09890;
+
+            /* Morandi palette — deeper */
+            --sage:      #6b8f78;
+            --sage-light:#b8c9bc;
+            --sage-muted:#9ab5a2;
+            --blush:     #b08878;
+            --blush-light:#ddc8c0;
+            --clay:      #9a7060;
+            --slate:     #6e7e90;
+            --slate-light:#b0bcc8;
+            --dusty:     #907878;
+            --warm:      #b09878;
+            --warm-light:#d8ccb8;
+
+            --low:       #b06840;
+            --low-bg:    #eeddd0;
+            --ok:        #5a8868;
+            --ok-bg:     #ccddd4;
+
+            --radius:    10px;
+            --shadow:    0 2px 12px rgba(46,42,38,0.10);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Noto Serif TC', serif;
+            background: var(--bg);
+            color: var(--text);
+            font-weight: 400;
+            line-height: 1.7;
+            font-size: 15px;
+        }
+
+        /* ===== LOGIN ===== */
+        .login-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg);
+            background-image:
+                radial-gradient(ellipse at 20% 50%, rgba(143,168,150,0.12) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(196,168,154,0.12) 0%, transparent 50%);
+        }
+
+        .login-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 48px 44px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: var(--shadow);
+        }
+
+        .login-logo {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 15px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--sage);
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .login-title {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 32px;
+        }
+
+        .field { margin-bottom: 16px; }
+        .field label {
+            display: block;
+            font-size: 15px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 7px;
+            font-weight: 700;
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+        .field input {
+            width: 100%;
+            padding: 11px 14px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 15px;
+            color: var(--text);
+            font-family: 'Noto Serif TC', serif;
+            font-weight: 700;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .field input:focus {
+            outline: none;
+            border-color: var(--sage);
+            box-shadow: 0 0 0 3px rgba(143,168,150,0.15);
+        }
+
+        .primary-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--sage);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            cursor: pointer;
+            font-family: 'Noto Sans TC', sans-serif;
+            font-weight: 600;
+            transition: background 0.2s, transform 0.1s;
+            margin-top: 4px;
+        }
+        .primary-btn:hover { background: #7d9884; transform: translateY(-1px); }
+        .primary-btn:active { transform: translateY(0); }
+        .primary-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+        .primary-btn.blush { background: var(--blush); }
+        .primary-btn.blush:hover { background: #b5998b; }
+
+        .divider {
+            display: flex; align-items: center; gap: 12px;
+            margin: 24px 0;
+            color: var(--text-light);
+            font-size: 15px;
+            letter-spacing: 1px;
+        }
+        .divider::before, .divider::after {
+            content: ''; flex: 1; height: 1px; background: var(--border);
+        }
+
+        .error-msg { color: var(--low); font-size: 12px; margin-top: 8px; }
+
+        /* ===== DASHBOARD ===== */
+        .dashboard { display: none; }
+        .dashboard.active { display: block; }
+
+        .topbar {
+            position: sticky; top: 0; z-index: 100;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 0 32px;
+            height: 58px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: baseline;
+            gap: 14px;
+        }
+
+        .topbar-brand {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 15px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--sage);
+            font-weight: 700;
+        }
+
+        .topbar-title {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .topbar-right { display: flex; align-items: center; gap: 10px; }
+
+        .user-tag {
+            font-size: 15px;
+            color: var(--text-muted);
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            padding: 5px 12px;
+            border-radius: 20px;
+        }
+
+        .icon-btn {
+            padding: 7px 14px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            font-size: 15px;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-family: 'Noto Serif TC', sans-serif;
+            transition: all 0.2s;
+            letter-spacing: 0.5px;
+        }
+        .icon-btn:hover { background: var(--surface2); color: var(--text); border-color: var(--text-light); }
+        .icon-btn.accent { background: var(--sage); color: white; border-color: var(--sage); }
+        .icon-btn.accent:hover { background: #7d9884; border-color: #7d9884; }
+
+        /* ===== TABS ===== */
+        .tab-bar {
+            display: flex;
+            gap: 0;
+            border-bottom: 1px solid var(--border);
+            padding: 0 32px;
+            background: var(--surface);
+        }
+        .tab-btn {
+            padding: 13px 22px;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            font-family: 'Noto Sans TC', sans-serif;
+            color: var(--text-light);
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            transition: color 0.2s, border-color 0.2s;
+            margin-bottom: -1px;
+        }
+        .tab-btn:hover { color: var(--text); }
+        .tab-btn.active { color: var(--sage); border-bottom-color: var(--sage); }
+
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* ===== MAIN ===== */
+        .main { padding: 28px 32px; max-width: 1360px; margin: 0 auto; }
+
+        /* ===== STATS ===== */
+        .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+        .stat {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 18px 20px;
+        }
+        .stat-label {
+            font-size: 15px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            font-family: 'Noto Serif TC', sans-serif;
+            font-weight: 600;
+        }
+        .stat-val {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 30px;
+            font-weight: 700;
+            color: var(--text);
+        }
+        .stat-val.s { color: var(--sage); }
+        .stat-val.b { color: var(--blush); }
+        .stat-val.w { color: var(--warm); }
+
+        /* ===== PROGRESS ===== */
+        .progress-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px 28px 24px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .progress-label {
+            font-size: 15px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            font-style: italic;
+        }
+        .progress-track {
+            background: var(--surface2);
+            border-radius: 4px;
+            height: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: var(--sage);
+            border-radius: 4px;
+            transition: width 0.4s ease;
+        }
+        .progress-sub { font-size: 11px; color: var(--text-light); }
+
+        /* ===== TOOLBAR ===== */
+        .toolbar {
+            display: none;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 14px 18px;
+            margin-bottom: 20px;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .toolbar.show { display: flex; }
+
+        .search-wrap { flex: 1; min-width: 200px; position: relative; }
+        .search-icon {
+            position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+            color: var(--text-light); font-size: 15px;
+        }
+        .search-input {
+            width: 100%;
+            padding: 9px 14px 9px 34px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            font-size: 15px;
+            color: var(--text);
+            font-family: 'Noto Serif TC', serif;
+            font-weight: 600;
+        }
+        .search-input:focus { outline: none; border-color: var(--sage); }
+
+        .filter-sel {
+            padding: 9px 12px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            font-size: 15px;
+            color: var(--text);
+            font-family: 'Noto Serif TC', serif;
+            cursor: pointer;
+        }
+        .filter-sel:focus { outline: none; border-color: var(--sage); }
+
+        .result-count { font-size: 15px; color: var(--text-light); margin-left: auto; letter-spacing: 0.5px; }
+
+        /* ===== PLACE SECTIONS ===== */
+        .place-section { margin-bottom: 16px; }
+
+        .place-head {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius) var(--radius) 0 0;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.15s;
+        }
+        .place-head:hover { background: var(--surface2); }
+
+        .place-head-left { display: flex; align-items: center; gap: 12px; }
+
+        .place-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--sage-muted); flex-shrink: 0;
+        }
+        .place-dot.warn { background: var(--blush); }
+
+        .place-name {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .place-tags { display: flex; gap: 8px; align-items: center; }
+
+        .tag {
+            font-size: 15px;
+            letter-spacing: 0.8px;
+            padding: 2px 9px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+        .tag-count { background: var(--sage-light); color: var(--sage); }
+        .tag-qty { background: var(--warm-light); color: #9a7d5a; }
+        .tag-warn { background: var(--blush-light); color: var(--clay); }
+
+        .collapse-icon {
+            font-size: 15px;
+            color: var(--text-light);
+            transition: transform 0.2s;
+        }
+        .collapsed .collapse-icon { transform: rotate(-90deg); }
+
+        .place-body {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-top: none;
+            border-radius: 0 0 var(--radius) var(--radius);
+            overflow: hidden;
+        }
+        .place-section.collapsed .place-body { display: none; }
+
+        table { width: 100%; border-collapse: collapse; }
+        thead tr { background: var(--surface2); border-bottom: 1px solid var(--border); }
+        th {
+            padding: 10px 16px;
+            text-align: left;
+            font-size: 15px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-family: 'Noto Serif TC', sans-serif;
+            border-bottom: 1px solid var(--border);
+        }
+        td { padding: 13px 16px; border-bottom: 1px solid var(--border); font-size: 15px; font-weight: 400; }
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover { background: rgba(143,168,150,0.04); }
+
+        .code { font-size: 15px; color: var(--text-light); font-family:; letter-spacing: 0.5px; }
+        .prod-name { color: var(--text); font-weight: 600; }
+
+        .qty-num {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 15px;
+            font-weight: 700;
+        }
+        .qty-num.ok { color: var(--ok); }
+        .qty-num.low { color: var(--low); }
+
+        .status-pip {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 15px;
+            letter-spacing: 0.5px;
+        }
+        .pip { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+        .pip.ok { background: var(--ok); }
+        .pip.low { background: var(--low); }
+
+        .expire-range {
+            font-size: 12px;
+            color: var(--text-light);
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+        }
+        .expire-range.expired { color: var(--low); font-weight: 600; }
+        .expire-range.expiring-soon { color: var(--warm); font-weight: 600; }
+        .expire-range.no-expire { color: var(--border); font-style: italic; }
+
+        .edit-link {
+            font-size: 15px;
+            color: var(--text-muted);
+            text-decoration: none;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1px;
+            transition: color 0.15s, border-color 0.15s;
+        }
+        .edit-link:hover { color: var(--sage); border-color: var(--sage); }
+
+        /* ===== 展開產品詳情 ===== */
+        .expand-btn {
+            background: none;
+            border: none;
+            color: var(--sage);
+            cursor: pointer;
+            font-size: 16px;
+            padding: 0 8px;
+            transition: transform 0.2s;
+            font-weight: 600;
+        }
+        .expand-btn.expanded { transform: rotate(90deg); }
+        .expand-btn:hover { opacity: 0.7; }
+
+        .product-details-row {
+            display: none;
+        }
+        .product-details-row.show {
+            display: table-row;
+        }
+
+        .product-details-cell {
+            padding: 16px;
+            background: rgba(143,168,150,0.06);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .product-details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 12px;
+        }
+
+        .location-item {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+        }
+
+        .location-header {
+            font-weight: 600;
+            color: var(--sage);
+            margin-bottom: 8px;
+            font-size: 13px;
+            letter-spacing: 0.5px;
+        }
+
+        .qty-edit-group {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            margin: 6px 0;
+        }
+
+        .qty-edit-input {
+            padding: 6px 8px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 13px;
+            width: 70px;
+            font-family: 'Noto Serif TC', serif;
+        }
+
+        .qty-edit-btn {
+            padding: 6px 10px;
+            background: var(--sage);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: background 0.2s;
+            font-weight: 600;
+        }
+        .qty-edit-btn:hover { background: #7d9884; }
+        .qty-edit-btn.cancel { background: var(--text-light); }
+        .qty-edit-btn.cancel:hover { background: #8f8577; }
+
+        .expire-edit-section {
+            border-top: 1px solid var(--border);
+            padding-top: 12px;
+            margin-top: 12px;
+        }
+
+        .expire-edit-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 6px;
+            display: block;
+            letter-spacing: 0.5px;
+        }
+
+        .expire-inputs {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+
+        .expire-input {
+            padding: 6px 8px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: 'Noto Serif TC', serif;
+            min-width: 100px;
+        }
+
+        .expire-btn {
+            padding: 8px 12px;
+            background: var(--warm);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: background 0.2s;
+            font-weight: 600;
+        }
+        .expire-btn:hover { background: #a08a6d; }
+
+        /* ===== TOAST ===== */
+        .toast {
+            position: fixed; bottom: 24px; right: 24px;
+            padding: 11px 18px; border-radius: 8px;
+            font-size: 12px; letter-spacing: 0.3px;
+            z-index: 9999; color: white;
+            animation: toastIn 0.3s ease;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        }
+        .toast.success { background: var(--sage); }
+        .toast.error { background: var(--blush); }
+        .toast.info { background: var(--slate); }
+        @keyframes toastIn { from { transform: translateY(12px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        .empty { text-align: center; padding: 60px; color: var(--text-light); font-size: 15px; font-style: italic; }
+
+        @media (max-width: 768px) {
+            .stats { grid-template-columns: repeat(2, 1fr); }
+            .main { padding: 16px; }
+            .topbar { padding: 0 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- 登入 -->
+<div id="loginPage" class="login-page">
+    <div class="login-card">
+        <div class="login-logo">Cosmos Club</div>
+        <div class="login-title">庫存總覽</div>
+
+        <div class="field">
+            <label>帳號</label>
+            <input type="text" id="username" placeholder="輸入帳號" autocomplete="username">
+        </div>
+        <div class="field">
+            <label>密碼</label>
+            <input type="password" id="password" autocomplete="current-password"
+                onkeydown="if(event.key==='Enter') login()">
+        </div>
+        <button class="primary-btn" id="loginBtn" onclick="login()">登入</button>
+        <div class="error-msg" id="errorMsg"></div>
+
+        <div class="divider">或</div>
+
+        <div class="field">
+            <label>Access Token</label>
+            <input type="text" id="tokenInput" placeholder="貼上 Token">
+        </div>
+        <button class="primary-btn blush" onclick="loginWithToken()">使用 Token 登入</button>
+    </div>
+</div>
+
+<!-- 儀表板 -->
+<div id="dashboard" class="dashboard">
+    <div class="topbar">
+        <div class="topbar-left">
+            <span class="topbar-brand">Cosmos Club</span>
+            <span class="topbar-title" id="topbarTitle">各分館庫存總覽</span>
+        </div>
+        <div class="topbar-right">
+            <span class="user-tag" id="userInfo"></span>
+            <button class="icon-btn accent" onclick="reloadCurrent()">↻ 重新載入</button>
+            <button class="icon-btn" onclick="logout()">登出</button>
+        </div>
+    </div>
+
+    <div class="tab-bar">
+        <button class="tab-btn active" id="tab-product" onclick="switchTab('product')">商品庫存</button>
+        <button class="tab-btn" id="tab-ticket" onclick="switchTab('ticket')">票券庫存</button>
+        <button class="tab-btn" id="tab-list" onclick="switchTab('list')">商品清單</button>
+    </div>
+
+    <!-- 商品 Tab -->
+    <div class="tab-panel active" id="panel-product">
+    <div class="main">
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-label">上架商品</div>
+                <div class="stat-val s" id="statActive">—</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">分館數</div>
+                <div class="stat-val w" id="statPlaces">—</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">低庫存</div>
+                <div class="stat-val b" id="statLow">—</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">總庫存量</div>
+                <div class="stat-val" id="statTotal">—</div>
+            </div>
+        </div>
+
+        <div class="progress-wrap" id="progressCard">
+            <div class="progress-label" id="progressLabel">準備載入...</div>
+            <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+            <div class="progress-sub" id="progressSub"></div>
+        </div>
+
+        <div class="toolbar" id="toolbar">
+            <div class="search-wrap">
+                <span class="search-icon">⌕</span>
+                <input class="search-input" type="text" id="searchInput" placeholder="搜尋商品名稱、編碼或廳別" oninput="renderAll()">
+            </div>
+            <select class="filter-sel" id="placeFilter" onchange="renderAll()">
+                <option value="">全部廳別</option>
+            </select>
+            <select class="filter-sel" id="statusFilter" onchange="renderAll()">
+                <option value="">全部狀態</option>
+                <option value="low">⚠ 低庫存</option>
+                <option value="ok">正常庫存</option>
+            </select>
+            <span class="result-count" id="resultCount"></span>
+        </div>
+
+        <div id="content"></div>
+    </div>
+    </div>
+
+    <!-- 票券 Tab -->
+    <div class="tab-panel" id="panel-ticket">
+    <div class="main">
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-label">上架票券</div>
+                <div class="stat-val s" id="tStatActive">—</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">分館數</div>
+                <div class="stat-val w" id="tStatPlaces">—</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">低庫存</div>
+                <div class="stat-val b" id="tStatLow">—</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">總庫存量</div>
+                <div class="stat-val" id="tStatTotal">—</div>
+            </div>
+        </div>
+
+        <div class="progress-wrap" id="tProgressCard">
+            <div class="progress-label" id="tProgressLabel">準備載入...</div>
+            <div class="progress-track"><div class="progress-fill" id="tProgressFill" style="width:0%"></div></div>
+            <div class="progress-sub" id="tProgressSub"></div>
+        </div>
+
+        <div class="toolbar" id="tToolbar">
+            <div class="search-wrap">
+                <span class="search-icon">⌕</span>
+                <input class="search-input" type="text" id="tSearchInput" placeholder="搜尋票券名稱、編碼或廳別" oninput="renderTickets()">
+            </div>
+            <select class="filter-sel" id="tPlaceFilter" onchange="renderTickets()">
+                <option value="">全部廳別</option>
+            </select>
+            <select class="filter-sel" id="tStatusFilter" onchange="renderTickets()">
+                <option value="">全部狀態</option>
+                <option value="low">⚠ 低庫存</option>
+                <option value="ok">正常庫存</option>
+            </select>
+            <span class="result-count" id="tResultCount"></span>
+        </div>
+
+        <div id="tContent"></div>
+    </div>
+    </div>
+
+    <!-- 商品清單 Tab（折疊式庫存/效期編輯） -->
+    <div class="tab-panel" id="panel-list">
+    <div class="main">
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-label">上架商品</div>
+                <div class="stat-val s" id="lStatActive">—</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">低庫存商品</div>
+                <div class="stat-val b" id="lStatLow">—</div>
+            </div>
+        </div>
+
+        <div class="toolbar show" id="lToolbar">
+            <div class="search-wrap">
+                <span class="search-icon">⌕</span>
+                <input class="search-input" type="text" id="lSearchInput" placeholder="搜尋商品名稱或編碼" oninput="renderProductList()">
+            </div>
+            <select class="filter-sel" id="lStatusFilter" onchange="renderProductList()">
+                <option value="">全部狀態</option>
+                <option value="low">⚠ 任一分館低庫存</option>
+                <option value="ok">全部分館正常</option>
+            </select>
+            <span class="result-count" id="lResultCount"></span>
+        </div>
+
+        <div id="lContent"></div>
+    </div>
+    </div>
+
+<script>
+    const API = 'https://cosmosapi-member.tw-cosmos.com/v1';
+    let accessToken = null;
+    let allData = [];
+    let placeMap = {};
+    let ticketData = [];
+    let ticketPlaceMap = {};
+    let ticketLoaded = false;
+    let currentTab = 'product';
+
+    function switchTab(tab) {
+        currentTab = tab;
+        document.getElementById('tab-product').classList.toggle('active', tab === 'product');
+        document.getElementById('tab-ticket').classList.toggle('active', tab === 'ticket');
+        document.getElementById('tab-list').classList.toggle('active', tab === 'list');
+        document.getElementById('panel-product').classList.toggle('active', tab === 'product');
+        document.getElementById('panel-ticket').classList.toggle('active', tab === 'ticket');
+        document.getElementById('panel-list').classList.toggle('active', tab === 'list');
+        document.getElementById('topbarTitle').textContent =
+            tab === 'product' ? '各分館商品庫存' :
+            tab === 'ticket'  ? '各分館票券庫存' : '所有商品庫存與效期管理';
+        if (tab === 'ticket' && !ticketLoaded) loadTicketData();
+        if (tab === 'list') {
+            if (!allData.length) {
+                document.getElementById('lContent').innerHTML = '<div class="empty">請先切換到「商品庫存」分頁載入資料</div>';
+            } else {
+                renderProductList();
+            }
+        }
+    }
+
+    function reloadCurrent() {
+        if (currentTab === 'product') reloadAll();
+        else if (currentTab === 'ticket') reloadTickets();
+        else reloadAll();
+    }
+
+    async function login() {
+        const u = document.getElementById('username').value.trim();
+        const p = document.getElementById('password').value.trim();
+        const err = document.getElementById('errorMsg');
+        const btn = document.getElementById('loginBtn');
+        if (!u || !p) { err.textContent = '請填寫帳號和密碼'; return; }
+        btn.disabled = true; err.textContent = '';
+        try {
+            const msgBuffer = new TextEncoder().encode(p);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashedPassword = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            const res = await fetch(`${API}/api/b/token?userid=${encodeURIComponent(u)}&password=${encodeURIComponent(hashedPassword)}`);
+            const data = await res.json();
+            if (data.code === 0 && data.accessToken) {
+                accessToken = data.accessToken;
+                enterDashboard(u);
+            } else {
+                err.textContent = data.message || '帳號或密碼錯誤';
+            }
+        } catch (e) { err.textContent = '連線失敗：' + e.message; }
+        finally { btn.disabled = false; }
+    }
+
+    function loginWithToken() {
+        const u = document.getElementById('username').value.trim();
+        const t = document.getElementById('tokenInput').value.trim();
+        if (!t) { document.getElementById('errorMsg').textContent = '請貼上 Token'; return; }
+        accessToken = t;
+        enterDashboard(u || 'user');
+    }
+
+    function enterDashboard(user) {
+        document.getElementById('loginPage').style.display = 'none';
+        document.getElementById('dashboard').classList.add('active');
+        document.getElementById('userInfo').textContent = user;
+        loadAllData();
+    }
+
+    function logout() {
+        accessToken = null; allData = []; placeMap = {};
+        document.getElementById('loginPage').style.display = 'flex';
+        document.getElementById('dashboard').classList.remove('active');
+        document.getElementById('password').value = '';
+        document.getElementById('tokenInput').value = '';
+    }
+
+    function reloadAll() {
+        allData = []; placeMap = {};
+        document.getElementById('progressCard').style.display = 'block';
+        document.getElementById('toolbar').classList.remove('show');
+        document.getElementById('content').innerHTML = '';
+        loadAllData();
+    }
+
+    function reloadTickets() {
+        ticketData = []; ticketPlaceMap = {}; ticketLoaded = false;
+        document.getElementById('tProgressCard').style.display = 'block';
+        document.getElementById('tToolbar').classList.remove('show');
+        document.getElementById('tContent').innerHTML = '';
+        loadTicketData();
+    }
+
+    async function loadTicketData() {
+        setTicketProgress(0, '載入票券列表中…', '');
+        try {
+            // Fetch all pages
+            let allTickets = [];
+            let page = 1;
+            while (true) {
+                const res = await fetch(`${API}/api/b/goods/ticket/list?limit=500&page=${page}`, {
+                    headers: { 'Authorization': `Bearer ${accessToken}` }
+                });
+                const data = await res.json();
+                let list = [];
+                if (data.data?.list) list = data.data.list;
+                else if (Array.isArray(data.data)) list = data.data;
+                else if (Array.isArray(data)) list = data;
+                if (!list.length) break;
+                allTickets.push(...list);
+                if (allTickets.length >= (data.data?.total || list.length)) break;
+                page++;
+            }
+
+            const active = allTickets.filter(t => t.status === '上架' || t.status === 1 || t.status === '區間');
+            setTicketProgress(50, `找到 ${active.length} 張票券`, '正在整理分館資料…');
+
+            // ticket/list 直接有 place 字串 (e.g. "花園 客房部/蜂巢 客房部")
+            // 用 ticketUseLocation 從 list API 取得 buidcoid→name 對照
+            // 但我們直接用 place 字串分割就好
+            const placeTickets = {};
+
+            for (const t of active) {
+                const places = (t.place || '').split('/').map(s => s.trim()).filter(Boolean);
+                if (!places.length) places.push('未指定廳別');
+                for (const placeName of places) {
+                    if (!placeTickets[placeName]) placeTickets[placeName] = [];
+                    // 避免同一票券重複加入同一廳別
+                    if (!placeTickets[placeName].find(x => x.gid === t.gid)) {
+                        placeTickets[placeName].push({
+                            gid: t.gid,
+                            name: t.name_cn,
+                            referID: t.referID,
+                            qty: t.amount ?? 0,
+                            lowPct: 5,
+                            expireBegin: t.expireBeginTime || null,
+                            expireEnd: t.expireEndTime || null,
+                        });
+                    }
+                }
+            }
+
+            ticketData = Object.keys(placeTickets).map(place => ({
+                ppsid: place, // 用 place name 當 key
+                place,
+                products: placeTickets[place].sort((a, b) => a.name.localeCompare(b.name, 'zh-TW'))
+            })).sort((a, b) => a.place.localeCompare(b.place, 'zh-TW'));
+
+            setTicketProgress(100, '載入完成', '');
+            updateTicketStats(active.length);
+
+            const pf = document.getElementById('tPlaceFilter');
+            pf.innerHTML = '<option value="">全部廳別</option>';
+            ticketData.forEach(g => {
+                const o = document.createElement('option');
+                o.value = g.ppsid; o.textContent = g.place;
+                pf.appendChild(o);
+            });
+
+            ticketLoaded = true;
+            setTimeout(() => {
+                document.getElementById('tProgressCard').style.display = 'none';
+                document.getElementById('tToolbar').classList.add('show');
+                renderTickets();
+                showToast(`載入完成 · ${active.length} 張票券 · ${ticketData.length} 個廳別`, 'success');
+            }, 400);
+
+        } catch (e) {
+            setTicketProgress(0, '載入失敗', e.message);
+            showToast('載入失敗：' + e.message, 'error');
+        }
+    }
+
+    function setTicketProgress(pct, label, sub) {
+        document.getElementById('tProgressFill').style.width = pct + '%';
+        document.getElementById('tProgressLabel').textContent = label;
+        document.getElementById('tProgressSub').textContent = sub;
+    }
+
+    function updateTicketStats(activeCount) {
+        let total = 0, low = 0;
+        ticketData.forEach(g => g.products.forEach(p => {
+            total += p.qty;
+            const t = Math.max(Math.ceil(p.lowPct / 100 * p.qty), 5);
+            if (p.qty <= t) low++;
+        }));
+        document.getElementById('tStatActive').textContent = activeCount;
+        document.getElementById('tStatPlaces').textContent = ticketData.length;
+        document.getElementById('tStatLow').textContent = low;
+        document.getElementById('tStatTotal').textContent = total.toLocaleString();
+    }
+
+    function renderTickets() {
+        const search = document.getElementById('tSearchInput').value.toLowerCase();
+        const pf = document.getElementById('tPlaceFilter').value;
+        const sf = document.getElementById('tStatusFilter').value;
+        let totalItems = 0;
+
+        const filtered = ticketData.map(g => {
+            if (pf && g.ppsid !== pf) return null;
+            const prods = g.products.filter(p => {
+                if (search && !p.name.toLowerCase().includes(search) &&
+                    !(p.referID||'').toLowerCase().includes(search) &&
+                    !g.place.toLowerCase().includes(search)) return false;
+                const t = Math.max(Math.ceil(p.lowPct / 100 * p.qty), 5);
+                if (sf === 'low' && p.qty > t) return false;
+                if (sf === 'ok' && p.qty <= t) return false;
+                return true;
+            });
+            if (!prods.length) return null;
+            return { ...g, products: prods };
+        }).filter(Boolean);
+
+        filtered.forEach(g => totalItems += g.products.length);
+        document.getElementById('tResultCount').textContent =
+            filtered.length ? `${filtered.length} 個分館 · ${totalItems} 張票券` : '';
+
+        if (!filtered.length) {
+            document.getElementById('tContent').innerHTML = '<div class="empty">無符合條件的資料</div>';
+            return;
+        }
+
+        document.getElementById('tContent').innerHTML = filtered.map(g => {
+            const totalQty = g.products.reduce((s, p) => s + p.qty, 0);
+            const lowItems = g.products.filter(p => p.qty <= Math.max(Math.ceil(p.lowPct/100*p.qty), 5));
+            const hasWarn = lowItems.length > 0;
+
+            const rows = g.products.map(p => {
+                const t = Math.max(Math.ceil(p.lowPct/100*p.qty), 5);
+                const isLow = p.qty <= t;
+                return `<tr>
+                    <td><span class="code">${p.referID||'—'}</span></td>
+                    <td><span class="prod-name">${p.name}</span></td>
+                    <td><span class="qty-num ${isLow?'low':'ok'}">${p.qty}</span></td>
+                    <td><span class="status-pip">
+                        <span class="pip ${isLow?'low':'ok'}"></span>
+                        ${isLow ? '低庫存' : '正常'}
+                    </span></td>
+                    <td>${formatExpire(p.expireBegin, p.expireEnd)}</td>
+                    <td><a class="edit-link" href="https://cosmosbackend.tw-cosmos.com/product-management/tickets/${p.gid}" target="_blank">前往編輯 ↗</a></td>
+                </tr>`;
+            }).join('');
+
+            const warnTag = hasWarn ? `<span class="tag tag-warn">${lowItems.length} 項低庫存</span>` : '';
+
+            return `<div class="place-section" id="tps-${g.ppsid}">
+                <div class="place-head" onclick="toggleSection('tps-${g.ppsid}')">
+                    <div class="place-head-left">
+                        <span class="place-dot ${hasWarn?'warn':''}"></span>
+                        <span class="place-name">${g.place}</span>
+                        <div class="place-tags">
+                            <span class="tag tag-count">${g.products.length} 張</span>
+                            <span class="tag tag-qty">庫存 ${totalQty}</span>
+                            ${warnTag}
+                        </div>
+                    </div>
+                    <span class="collapse-icon">▾</span>
+                </div>
+                <div class="place-body">
+                    <table>
+                        <thead><tr>
+                            <th>編碼</th>
+                            <th>票券名稱</th>
+                            <th>庫存數量</th>
+                            <th>狀態</th>
+                            <th>兌換期限</th>
+                            <th>操作</th>
+                        </tr></thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    async function loadAllData() {
+        setProgress(0, '載入商品列表中…', '');
+        try {
+            const listRes = await fetch(`${API}/api/b/goods/product/list?limit=500&page=1`, {
+                headers: { 'Authorization': `Bearer ${accessToken}` }
+            });
+            const listData = await listRes.json();
+            let products = [];
+            if (listData.data?.list) products = listData.data.list;
+            else if (Array.isArray(listData.data)) products = listData.data;
+            else if (Array.isArray(listData)) products = listData;
+
+            const active = products.filter(p => p.status === '上架' || p.status === 1);
+            setProgress(5, `找到 ${active.length} 個上架商品`, '正在取得各館庫存資料…');
+
+            const BATCH = 10;
+            const details = [];
+            for (let i = 0; i < active.length; i += BATCH) {
+                const batch = active.slice(i, i + BATCH);
+                const results = await Promise.all(batch.map(p =>
+                    fetch(`${API}/api/b/goods/product/info?gid=${p.gid}`, {
+                        headers: { 'Authorization': `Bearer ${accessToken}` }
+                    }).then(r => r.json()).catch(() => null)
+                ));
+                details.push(...results.filter(Boolean));
+                const pct = 5 + Math.round(((i + batch.length) / active.length) * 90);
+                setProgress(pct, `已載入 ${Math.min(i + BATCH, active.length)} / ${active.length}`, '');
+            }
+
+            for (const d of details) {
+                if (d.data?.selftakelist) {
+                    d.data.selftakelist.forEach(s => { placeMap[s.ppsid] = s.name_cn; });
+                    break;
+                }
+            }
+
+            const placeProducts = {};
+            for (const d of details) {
+                if (!d.data?.info) continue;
+                const info = d.data.info;
+                (info.productPlace || []).forEach(pp => {
+                    if (!placeProducts[pp.ppsid]) placeProducts[pp.ppsid] = [];
+                    placeProducts[pp.ppsid].push({
+                        gid: info.gid,
+                        name: info.name_cn,
+                        referID: info.referID,
+                        qty: pp.qty,
+                        lowPct: pp.low_qty_percent || 5,
+                        expireBegin: info.expireBeginTime || null,
+                        expireEnd: info.expireEndTime || null,
+                    });
+                });
+            }
+
+            allData = Object.keys(placeProducts).map(ppsid => ({
+                ppsid: parseInt(ppsid),
+                place: placeMap[ppsid] || `分館 ${ppsid}`,
+                products: placeProducts[ppsid].sort((a, b) => a.name.localeCompare(b.name, 'zh-TW'))
+            })).sort((a, b) => a.place.localeCompare(b.place, 'zh-TW'));
+
+            setProgress(100, '載入完成', '');
+            updateStats(active.length);
+
+            const pf = document.getElementById('placeFilter');
+            pf.innerHTML = '<option value="">全部廳別</option>';
+            allData.forEach(g => {
+                const o = document.createElement('option');
+                o.value = g.ppsid; o.textContent = g.place;
+                pf.appendChild(o);
+            });
+
+            setTimeout(() => {
+                document.getElementById('progressCard').style.display = 'none';
+                document.getElementById('toolbar').classList.add('show');
+                renderAll();
+                showToast(`載入完成 · ${active.length} 個商品 · ${allData.length} 個廳別`, 'success');
+            }, 400);
+
+        } catch (e) {
+            setProgress(0, '載入失敗', e.message);
+            showToast('載入失敗：' + e.message, 'error');
+        }
+    }
+
+    function setProgress(pct, label, sub) {
+        document.getElementById('progressFill').style.width = pct + '%';
+        document.getElementById('progressLabel').textContent = label;
+        document.getElementById('progressSub').textContent = sub;
+    }
+
+    function updateStats(activeCount) {
+        let total = 0, low = 0;
+        allData.forEach(g => g.products.forEach(p => {
+            total += p.qty;
+            const t = Math.max(Math.ceil(p.lowPct / 100 * p.qty), 5);
+            if (p.qty <= t) low++;
+        }));
+        document.getElementById('statActive').textContent = activeCount;
+        document.getElementById('statPlaces').textContent = allData.length;
+        document.getElementById('statLow').textContent = low;
+        document.getElementById('statTotal').textContent = total.toLocaleString();
+    }
+
+    function formatDateForInput(dateStr) {
+        if (!dateStr || dateStr === '—') return '';
+        if (typeof dateStr === 'string' && dateStr.match(/^\d{4}[/-]\d{2}[/-]\d{2}/)) {
+            const normalized = dateStr.split(' ')[0].replace(/\//g, '-');
+            return normalized;
+        }
+        const timestamp = Number(dateStr);
+        if (!isNaN(timestamp) && timestamp > 0) {
+            const d = new Date(timestamp * 1000);
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const date = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${date}`;
+        }
+        return '';
+    }
+
+    function toggleProductDetails(detailsId, btn) {
+        const row = document.getElementById(detailsId);
+        if (!row) return;
+        row.classList.toggle('show');
+        btn.classList.toggle('expanded');
+        if (row.classList.contains('show')) {
+            const gidMatch = detailsId.match(/details-(\d+)/);
+            if (gidMatch) {
+                const gid = parseInt(gidMatch[1]);
+                renderProductDetails(gid, row);
+            }
+        }
+    }
+
+    function renderProductDetails(gid, row) {
+        const gridEl = row.querySelector('.product-details-grid');
+        if (!gridEl) return;
+        const locations = [];
+        allData.forEach(place => {
+            const product = place.products.find(p => p.gid === gid);
+            if (product) {
+                locations.push({
+                    place: place.place,
+                    ppsid: place.ppsid,
+                    product: product
+                });
+            }
+        });
+        if (locations.length === 0) {
+            gridEl.innerHTML = '<div style="padding: 12px; color: var(--text-light);">此商品無庫存紀錄</div>';
+            return;
+        }
+        gridEl.innerHTML = locations.map(loc => `
+            <div class="location-item">
+                <div class="location-header">${loc.place}</div>
+                <div class="qty-edit-group">
+                    <label style="font-size: 12px; color: var(--text-light);">庫存：</label>
+                    <input type="number" class="qty-edit-input" value="${loc.product.qty}" min="0">
+                    <button class="qty-edit-btn" onclick="updateProductStock(${gid}, ${loc.ppsid}, this)">更新</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // ===== 後端寫入：PUT https://cosmosapi-member.tw-cosmos.com/v1/api/b/goods/product =====
+    // 這支 API 是「整包覆蓋」商品資料，不是只改單一欄位，
+    // 所以每次寫入前都會重新 GET 一次該商品最新的完整資料，
+    // 只覆蓋我們要改的欄位（庫存 qty 或效期），其餘欄位原封不動送回去，
+    // 盡量降低覆蓋掉別人同時間修改的風險，也避免把 description / 圖片 / 標籤等欄位洗掉。
+
+    // 'YYYY-MM-DD' 字串 → epoch 秒數（以台北時間午夜為準；已經是數字/時間戳的值原樣通過）
+    function toEpochSeconds(v) {
+        if (v === null || v === undefined || v === '' || v === 0 || v === '0') return 0;
+        if (typeof v === 'string' && v.match(/^\d{4}[/-]\d{2}[/-]\d{2}/)) {
+            const datePart = v.split(' ')[0].replace(/\//g, '-');
+            const [y, m, d] = datePart.split('-').map(Number);
+            return Math.floor((Date.UTC(y, m - 1, d, 0, 0, 0) - 8 * 3600 * 1000) / 1000);
+        }
+        const num = Number(v);
+        return isNaN(num) ? 0 : Math.floor(num);
+    }
+
+    // 用剛 GET 回來的 info 物件，組出 PUT /goods/product 需要的完整 payload
+    function buildProductPutPayload(info) {
+        return {
+            gid: info.gid,
+            top: info.top,
+            description: info.description,
+            amount: info.amount,
+            buid: info.buid,
+            coid: info.coid,
+            discount: info.discount,
+            email: info.email,
+            expireBeginTime: toEpochSeconds(info.expireBeginTime),
+            expireEndTime: toEpochSeconds(info.expireEndTime),
+            intro_cn: info.intro_cn,
+            itemTypeMap: info.itemTypeMap,
+            limit: info.limit,
+            low_qty_percent: info.low_qty_percent,
+            name_cn: info.name_cn,
+            pic: info.pic,
+            pic_s: info.pic_s,
+            point: info.point,
+            productPlace: (info.productPlace || []).map(pp => ({
+                ppsid: pp.ppsid,
+                qty: pp.qty,
+                low_qty_percent: pp.low_qty_percent
+            })),
+            referID: info.referID,
+            shippingType: info.shippingType,
+            status: info.status,
+            stock: info.stock,
+            tags: info.tags,
+            totQty: info.totQty
+        };
+    }
+
+    async function fetchFreshProductInfo(gid) {
+        const res = await fetch(`${API}/api/b/goods/product/info?gid=${gid}`, {
+            headers: { 'Authorization': `Bearer ${accessToken}` }
+        });
+        const data = await res.json();
+        return data?.data?.info || null;
+    }
+
+    async function putProduct(payload) {
+        const res = await fetch(`${API}/api/b/goods/product`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+        let data = null;
+        try { data = await res.json(); } catch (e) { /* 可能無回應內容 */ }
+        if (!res.ok) return false;
+        if (data && typeof data.code !== 'undefined') return data.code === 0;
+        return true;
+    }
+
+    async function persistStockUpdate(gid, ppsid, qty) {
+        try {
+            const info = await fetchFreshProductInfo(gid);
+            if (!info) return false;
+            const payload = buildProductPutPayload(info);
+            const pp = payload.productPlace.find(x => x.ppsid == ppsid);
+            if (pp) pp.qty = qty;
+            else payload.productPlace.push({ ppsid, qty, low_qty_percent: 5 });
+            return await putProduct(payload);
+        } catch (e) {
+            console.error(e);
+            return false;
+        }
+    }
+
+    async function persistExpireUpdate(gid, beginVal, endVal) {
+        try {
+            const info = await fetchFreshProductInfo(gid);
+            if (!info) return false;
+            const payload = buildProductPutPayload(info);
+            payload.expireBeginTime = toEpochSeconds(beginVal);
+            payload.expireEndTime = toEpochSeconds(endVal);
+            return await putProduct(payload);
+        } catch (e) {
+            console.error(e);
+            return false;
+        }
+    }
+
+    async function updateProductStock(gid, ppsid, btn) {
+        const input = btn.previousElementSibling;
+        if (!input) return;
+        const newQty = parseInt(input.value) || 0;
+        btn.disabled = true;
+        const ok = await persistStockUpdate(gid, ppsid, newQty);
+        btn.disabled = false;
+        if (!ok) { showToast('庫存更新失敗，後台未同步', 'error'); return; }
+        allData.forEach(place => {
+            if (place.ppsid == ppsid) {
+                const product = place.products.find(p => p.gid === gid);
+                if (product) {
+                    product.qty = newQty;
+                }
+            }
+        });
+        btn.textContent = '✓ 已保存';
+        setTimeout(() => btn.textContent = '更新', 2000);
+        updateStats(allData.reduce((s, g) => s + g.products.length, 0));
+        renderAll();
+        showToast(`庫存已更新到後台`, 'success');
+    }
+
+    async function updateExpireDate(gid, productName, btn) {
+        const wrap = btn.closest('.expire-inputs');
+        const dateInputs = wrap ? wrap.querySelectorAll('input[type="date"]') : [];
+        const beginInput = dateInputs[0];
+        const endInput = dateInputs[1];
+        if (!beginInput || !endInput) return;
+        const beginVal = beginInput.value;
+        const endVal = endInput.value;
+        if (!beginVal || !endVal) {
+            showToast('請填寫開始和結束日期', 'error');
+            return;
+        }
+        const ok = await persistExpireUpdate(gid, beginVal, endVal);
+        if (!ok) { showToast('效期更新失敗，後台未同步', 'error'); return; }
+        allData.forEach(place => {
+            const product = place.products.find(p => p.gid === gid);
+            if (product) {
+                product.expireBegin = beginVal;
+                product.expireEnd = endVal;
+            }
+        });
+        renderAll();
+        showToast(`${productName} 的效期已更新到所有分館（含後台）`, 'success');
+    }
+
+    function buildProductIndex() {
+        const map = {};
+        allData.forEach(place => {
+            place.products.forEach(p => {
+                if (!map[p.gid]) {
+                    map[p.gid] = {
+                        gid: p.gid,
+                        name: p.name,
+                        referID: p.referID,
+                        expireBegin: p.expireBegin,
+                        expireEnd: p.expireEnd,
+                        locations: []
+                    };
+                }
+                map[p.gid].locations.push({
+                    ppsid: place.ppsid,
+                    place: place.place,
+                    qty: p.qty,
+                    lowPct: p.lowPct
+                });
+            });
+        });
+        return Object.values(map).sort((a, b) => a.name.localeCompare(b.name, 'zh-TW'));
+    }
+
+    function renderProductList() {
+        const search = document.getElementById('lSearchInput').value.toLowerCase();
+        const sf = document.getElementById('lStatusFilter').value;
+        const products = buildProductIndex();
+
+        const withLowFlag = products.map(prod => {
+            const hasLow = prod.locations.some(loc => loc.qty <= Math.max(Math.ceil(loc.lowPct / 100 * loc.qty), 5));
+            const allOk = prod.locations.every(loc => loc.qty > Math.max(Math.ceil(loc.lowPct / 100 * loc.qty), 5));
+            return { ...prod, hasLow, allOk };
+        });
+
+        document.getElementById('lStatActive').textContent = products.length;
+        document.getElementById('lStatLow').textContent = withLowFlag.filter(p => p.hasLow).length;
+
+        const filtered = withLowFlag.filter(p => {
+            if (search && !p.name.toLowerCase().includes(search) && !(p.referID || '').toLowerCase().includes(search)) return false;
+            if (sf === 'low' && !p.hasLow) return false;
+            if (sf === 'ok' && !p.allOk) return false;
+            return true;
+        });
+
+        document.getElementById('lResultCount').textContent =
+            filtered.length ? `${filtered.length} 項商品` : '';
+
+        if (!filtered.length) {
+            document.getElementById('lContent').innerHTML = '<div class="empty">無符合條件的資料</div>';
+            return;
+        }
+
+        document.getElementById('lContent').innerHTML = filtered.map(p => {
+            const totalQty = p.locations.reduce((s, loc) => s + loc.qty, 0);
+            const warnTag = p.hasLow ? `<span class="tag tag-warn">低庫存</span>` : '';
+
+            const locationItems = p.locations.map(loc => {
+                return `<div class="location-item">
+                    <div class="location-header">${loc.place}</div>
+                    <div class="qty-edit-group">
+                        <label style="font-size: 12px; color: var(--text-light);">庫存：</label>
+                        <input type="number" class="qty-edit-input" id="lqty-${p.gid}-${loc.ppsid}" value="${loc.qty}" min="0">
+                        <button class="qty-edit-btn" onclick="updateProductStockFromList(${p.gid}, ${loc.ppsid}, this)">更新</button>
+                    </div>
+                </div>`;
+            }).join('');
+
+            return `<div class="place-section" id="pls-${p.gid}">
+                <div class="place-head" onclick="toggleSection('pls-${p.gid}')">
+                    <div class="place-head-left">
+                        <span class="place-dot ${p.hasLow?'warn':''}"></span>
+                        <span class="place-name">${p.name}</span>
+                        <div class="place-tags">
+                            <span class="tag tag-count">${p.referID||'—'}</span>
+                            <span class="tag tag-qty">總庫存 ${totalQty}</span>
+                            ${warnTag}
+                        </div>
+                    </div>
+                    <span class="collapse-icon">▾</span>
+                </div>
+                <div class="place-body">
+                    <div class="product-details-cell">
+                        <div class="product-details-grid">${locationItems}</div>
+                        <div class="expire-edit-section">
+                            <label class="expire-edit-label">🕐 編輯此商品效期（影響全部分館）</label>
+                            <div class="expire-inputs">
+                                <input type="date" class="expire-input" id="lexpire-begin-${p.gid}" value="${formatDateForInput(p.expireBegin)}">
+                                <span style="color: var(--text-light);">～</span>
+                                <input type="date" class="expire-input" id="lexpire-end-${p.gid}" value="${formatDateForInput(p.expireEnd)}">
+                                <button class="expire-btn" onclick="updateExpireDateFromList(${p.gid}, '${p.name}')">✓ 保存</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    async function updateProductStockFromList(gid, ppsid, btn) {
+        const input = document.getElementById(`lqty-${gid}-${ppsid}`);
+        if (!input) return;
+        const newQty = parseInt(input.value) || 0;
+        btn.disabled = true;
+        const ok = await persistStockUpdate(gid, ppsid, newQty);
+        btn.disabled = false;
+        if (!ok) { showToast('庫存更新失敗，後台未同步', 'error'); return; }
+        allData.forEach(place => {
+            if (place.ppsid == ppsid) {
+                const product = place.products.find(p => p.gid === gid);
+                if (product) product.qty = newQty;
+            }
+        });
+        btn.textContent = '✓ 已保存';
+        setTimeout(() => btn.textContent = '更新', 2000);
+        updateStats(allData.reduce((s, g) => s + g.products.length, 0));
+        renderAll();
+        renderProductList();
+        showToast(`庫存已更新到後台`, 'success');
+    }
+
+    async function updateExpireDateFromList(gid, productName) {
+        const beginInput = document.getElementById(`lexpire-begin-${gid}`);
+        const endInput = document.getElementById(`lexpire-end-${gid}`);
+        if (!beginInput || !endInput) return;
+        const beginVal = beginInput.value;
+        const endVal = endInput.value;
+        if (!beginVal || !endVal) {
+            showToast('請填寫開始和結束日期', 'error');
+            return;
+        }
+        const ok = await persistExpireUpdate(gid, beginVal, endVal);
+        if (!ok) { showToast('效期更新失敗，後台未同步', 'error'); return; }
+        allData.forEach(place => {
+            const product = place.products.find(p => p.gid === gid);
+            if (product) {
+                product.expireBegin = beginVal;
+                product.expireEnd = endVal;
+            }
+        });
+        renderAll();
+        renderProductList();
+        showToast(`${productName} 的效期已更新到所有分館（含後台）`, 'success');
+    }
+
+    function formatExpire(begin, end) {
+        const isEmpty = v => !v || v === '0' || v === 0 || v === null || v === undefined;
+        if (isEmpty(begin) && isEmpty(end)) return `<span class="expire-range no-expire">無期限設定</span>`;
+        
+        const fmt = v => {
+            if (isEmpty(v)) return '—';
+            
+            // 如果已經是日期字符串格式（YYYY/MM/DD 或 YYYY-MM-DD）
+            if (typeof v === 'string') {
+                // 檢查是否已經是 YYYY/MM/DD 格式
+                if (v.includes('/') && v.match(/^\d{4}\/\d{2}\/\d{2}/)) {
+                    return v; // 已經是對的格式，直接返回
+                }
+                // 檢查是否是 YYYY-MM-DD 格式
+                if (v.includes('-') && v.match(/^\d{4}-\d{2}-\d{2}/)) {
+                    return v.split(' ')[0].replace(/-/g, '/'); // 轉換為 YYYY/MM/DD
+                }
+            }
+            
+            // 處理時間戳 (秒數)
+            const timestamp = Number(v);
+            if (isNaN(timestamp) || timestamp === 0) return '—';
+            
+            try {
+                const d = new Date(timestamp * 1000);
+                // 檢查日期是否有效
+                if (isNaN(d.getTime())) return '—';
+                const year = d.getFullYear();
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const date = String(d.getDate()).padStart(2, '0');
+                return `${year}/${month}/${date}`;
+            } catch (e) {
+                return '—';
+            }
+        };
+        
+        const toMs = v => {
+            if (isEmpty(v)) return null;
+            
+            // 如果是字符串日期格式
+            if (typeof v === 'string') {
+                // YYYY/MM/DD 或 YYYY-MM-DD 格式
+                if (v.match(/^\d{4}[/-]\d{2}[/-]\d{2}/)) {
+                    // 統一轉換為 YYYY-MM-DD 格式給 Date 物件
+                    const normalized = v.split(' ')[0].replace(/\//g, '-');
+                    return new Date(normalized).getTime();
+                }
+            }
+            
+            const timestamp = Number(v);
+            if (isNaN(timestamp) || timestamp === 0) return null;
+            return timestamp * 1000;
+        };
+        
+        const endMs = toMs(end);
+        const now = Date.now();
+        let cls = 'expire-range';
+        
+        // 檢查是否已過期
+        if (endMs && endMs < now) {
+            cls += ' expired';
+        } else if (endMs && endMs - now < 30 * 86400 * 1000) {
+            cls += ' expiring-soon';
+        }
+        
+        const beginStr = fmt(begin);
+        const endStr = fmt(end);
+        return `<span class="${cls}">${beginStr} ～ ${endStr}</span>`;
+    }
+
+    function renderAll() {
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        const pf = document.getElementById('placeFilter').value;
+        const sf = document.getElementById('statusFilter').value;
+
+        let totalItems = 0;
+
+        const filtered = allData.map(g => {
+            if (pf && g.ppsid != pf) return null;
+            const prods = g.products.filter(p => {
+                if (search && !p.name.toLowerCase().includes(search) &&
+                    !(p.referID||'').toLowerCase().includes(search) &&
+                    !g.place.toLowerCase().includes(search)) return false;
+                const t = Math.max(Math.ceil(p.lowPct / 100 * p.qty), 5);
+                if (sf === 'low' && p.qty > t) return false;
+                if (sf === 'ok' && p.qty <= t) return false;
+                return true;
+            });
+            if (!prods.length) return null;
+            return { ...g, products: prods };
+        }).filter(Boolean);
+
+        filtered.forEach(g => totalItems += g.products.length);
+        document.getElementById('resultCount').textContent =
+            filtered.length ? `${filtered.length} 個分館 · ${totalItems} 項商品` : '';
+
+        if (!filtered.length) {
+            document.getElementById('content').innerHTML = '<div class="empty">無符合條件的資料</div>';
+            return;
+        }
+
+        document.getElementById('content').innerHTML = filtered.map(g => {
+            const totalQty = g.products.reduce((s, p) => s + p.qty, 0);
+            const lowItems = g.products.filter(p => p.qty <= Math.max(Math.ceil(p.lowPct/100*p.qty), 5));
+            const hasWarn = lowItems.length > 0;
+
+            const rows = g.products.map(p => {
+                const t = Math.max(Math.ceil(p.lowPct/100*p.qty), 5);
+                const isLow = p.qty <= t;
+                const detailsId = `details-${p.gid}-${g.ppsid}`;
+
+                return `<tr id="product-${p.gid}-${g.ppsid}">
+                    <td><button class="expand-btn" onclick="toggleProductDetails('${detailsId}', this)">▶</button></td>
+                    <td><span class="code">${p.referID||'—'}</span></td>
+                    <td><span class="prod-name">${p.name}</span></td>
+                    <td><span class="qty-num ${isLow?'low':'ok'}">${p.qty}</span></td>
+                    <td><span class="status-pip">
+                        <span class="pip ${isLow?'low':'ok'}"></span>
+                        ${isLow ? '低庫存' : '正常'}
+                    </span></td>
+                    <td>${formatExpire(p.expireBegin, p.expireEnd)}</td>
+                    <td><a class="edit-link" href="https://cosmosbackend.tw-cosmos.com/product-management/products/${p.gid}" target="_blank">前往編輯 ↗</a></td>
+                </tr>
+                <tr class="product-details-row" id="${detailsId}">
+                    <td colspan="7">
+                        <div class="product-details-cell">
+                            <div style="margin-bottom: 12px;">
+                                <strong style="color: var(--text);">📦 ${p.name}</strong>
+                                <div style="font-size: 12px; color: var(--text-light);">SKU: ${p.referID||'—'}</div>
+                            </div>
+                            <div class="product-details-grid">
+                                <!-- 各分館庫存將在這裡動態填入 -->
+                            </div>
+                            <div class="expire-edit-section">
+                                <label class="expire-edit-label">🕐 編輯此商品效期（影響全部分館）</label>
+                                <div class="expire-inputs">
+                                    <input type="date" class="expire-input" value="${formatDateForInput(p.expireBegin)}">
+                                    <span style="color: var(--text-light);">～</span>
+                                    <input type="date" class="expire-input" value="${formatDateForInput(p.expireEnd)}">
+                                    <button class="expire-btn" onclick="updateExpireDate(${p.gid}, '${p.name}', this)">✓ 保存</button>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>`;
+            }).join('');
+
+            const warnTag = hasWarn
+                ? `<span class="tag tag-warn">${lowItems.length} 項低庫存</span>` : '';
+
+            return `<div class="place-section" id="ps-${g.ppsid}">
+                <div class="place-head" onclick="toggleSection('ps-${g.ppsid}')">
+                    <div class="place-head-left">
+                        <span class="place-dot ${hasWarn?'warn':''}"></span>
+                        <span class="place-name">${g.place}</span>
+                        <div class="place-tags">
+                            <span class="tag tag-count">${g.products.length} 項</span>
+                            <span class="tag tag-qty">庫存 ${totalQty}</span>
+                            ${warnTag}
+                        </div>
+                    </div>
+                    <span class="collapse-icon">▾</span>
+                </div>
+                <div class="place-body">
+                    <table>
+                        <thead><tr>
+                            <th style="width: 40px;"></th>
+                            <th>編碼</th>
+                            <th>商品名稱</th>
+                            <th>庫存數量</th>
+                            <th>狀態</th>
+                            <th>兌換期限</th>
+                            <th>操作</th>
+                        </tr></thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    function toggleSection(id) {
+        document.getElementById(id).classList.toggle('collapsed');
+    }
+
+    function showToast(msg, type = 'info') {
+        const t = document.createElement('div');
+        t.className = `toast ${type}`;
+        t.textContent = msg;
+        document.body.appendChild(t);
+        setTimeout(() => { t.style.transition = 'opacity 0.3s'; t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000);
+    }
+</script>
+</body>
+</html>
